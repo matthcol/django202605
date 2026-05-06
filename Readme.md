@@ -5,6 +5,8 @@
 django
 django-extensions
 djangorestframework
+django-debug-toolbar
+drf-spectacular         # Swagger API
 jupyterlab
 ```
 
@@ -41,5 +43,14 @@ Apres avoir ajouté django-extensions en dépendance et en django_extensions com
 ```
 python .\manage.py shell
 python manage.py shell_plus  
-python .\manage.py shell_plus --lab
+python .\manage.py shell_plus --lab           # dans le navigateur
 ```
+
+Pour lancer le notebook dans VSCode:
+```
+DJANGO_SETTINGS_MODULE=netpy.settings
+````
+
+## Documentation Queries et fonctions
+- https://docs.djangoproject.com/en/6.0/ref/models/querysets
+- https://docs.djangoproject.com/en/6.0/ref/models/database-functions

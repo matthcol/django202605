@@ -11,14 +11,6 @@ class Person(models.Model):
     is_alive = models.BooleanField(default=True)
     
     # age = models.PositiveSmallIntegerField()
-    def age(self):
-        if self.birthdate is None:
-            return None
-        today = date.today()
-        delta_year = today.year - self.birthdate.year
-        if (today.month, today.day) >= (self.birthdate.month, self.birthdate.day):
-            return delta_year
-        else:
-            return delta_year - 1
+
     
     
