@@ -3,6 +3,8 @@ from rest_framework.serializers import (
     PrimaryKeyRelatedField,
     ModelSerializer,
     Serializer,
+    ListSerializer,
+    ValidationError,
 )
 
 from app_movie.models import Movie
@@ -31,6 +33,22 @@ class MovieSimpleSerializer(ModelSerializer):
         model = Movie
         fields = 'id', 'title', 'year',
 
+class CastingListSerializer(ListSerializer):
+    def validate(self, attrs):
+        seen = set()
+        for item in attrs:
+            key = (item['actor'].pk, item['character'])
+            if key in seen:
+                raise ValidationError(
+                    f"Duplicate entry: actor {item['actor']} already has character '{item['character']}'."
+                )
+            seen.add(key)
+        return attrs
+
+
 class CastingItemSerializer(Serializer):
     actor = PrimaryKeyRelatedField(queryset=Person.objects.all())
     character = CharField(max_length=100)
+
+    class Meta:
+        list_serializer_class = CastingListSerializer

@@ -159,6 +159,19 @@ Content-Type: application/json
     {"actor": 105, "character": "Duke Cody"}
 ]
 
+### PUT casting Inception — Error : doublon
+PUT {{baseUrl}}/movies/5/casting/
+Content-Type: application/json
+
+[
+    {"actor": 25, "character": "Cobb"},
+    {"actor": 11, "character": "Arthur"},
+    {"actor": 26, "character": "Ariadne"},
+    {"actor": 10, "character": "Eames"},
+    {"actor": 27, "character": "Saito"},
+    {"actor": 11, "character": "Arthur"}
+]
+
 # ─────────────────────────────────────────────
 # SUPPRESSION
 # ─────────────────────────────────────────────

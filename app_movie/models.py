@@ -36,3 +36,6 @@ class Play(models.Model):
 
     # association field(s)  
     character = models.CharField(max_length=100)
+
+    class Meta:
+        unique_together = ('movie', 'actor', 'character')
