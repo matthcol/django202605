@@ -1,8 +1,10 @@
-from typing import override
+from typing import cast, override
 
 from django.shortcuts import render
 from django.db.models import QuerySet
 
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from app_movie.models import Movie
@@ -37,3 +39,33 @@ class MovieViewSet(ModelViewSet):
             case _:
                 return MovieSaveSerializer
 
+
+    def _detail_response(self, pk, http_status=status.HTTP_200_OK):
+        instance = Movie.objects.select_related('director').prefetch_related('actors').get(pk=pk)
+        return Response(MovieDetailSerializer(instance).data, status=http_status)
+
+    @override
+    def create(self, request, *_args, **_kwargs):
+        serializer = MovieSaveSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        movie = cast(Movie, serializer.save())
+        return self._detail_response(movie.pk, status.HTTP_201_CREATED)
+
+    # TODO : merge update et partial_update
+    @override
+    def update(self, request, *_args, **_kwargs):
+        instance = self.get_object()
+        serializer = MovieSaveSerializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return self._detail_response(instance.pk)
+
+    @override
+    def partial_update(self, request, *_args, **_kwargs):
+        instance = self.get_object()
+        serializer = MovieSaveSerializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return self._detail_response(instance.pk)
+    
+    # TODO : route casting + PATCH

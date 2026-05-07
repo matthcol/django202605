@@ -133,7 +133,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # django-debug-toolbar
 INTERNAL_IPS = ['127.0.0.1']
 
+# SQL logging in console (dev only)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler'},
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
+
 # Django REST Framework
 REST_FRAMEWORK = {
+    # Swagger
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
