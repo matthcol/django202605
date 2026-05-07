@@ -10,9 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -20,12 +20,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9jkb0$fy@9l(x%$w$cp%u*a!*^e5f+4p+hek8$v9hsu7v6*i0!'
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-9jkb0$fy@9l(x%$w$cp%u*a!*^e5f+4p+hek8$v9hsu7v6*i0!'
+)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -38,18 +40,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # tiers
-    'debug_toolbar',
     'rest_framework',
     'django_extensions',
     'drf_spectacular',
-    # projects apps
+    # projects apps (debug toolbar ajouté dynamiquement si DEBUG)
     'app_people',
-    'app_movie'
+    'app_movie',
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -57,6 +60,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if DEBUG:
+    MIDDLEWARE.insert(1, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 ROOT_URLCONF = 'netpy.urls'
 
@@ -81,12 +87,24 @@ WSGI_APPLICATION = 'netpy.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if os.environ.get('DB_ENGINE') == 'sqlite':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE':   'django.db.backends.postgresql',
+            'HOST':     os.environ.get('DB_HOST',     'localhost'),
+            'PORT':     os.environ.get('DB_PORT',     '5432'),
+            'NAME':     os.environ.get('DB_NAME',     'netpy'),
+            'USER':     os.environ.get('DB_USER',     'netpy'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'netpy'),
+        }
+    }
 
 
 # Password validation

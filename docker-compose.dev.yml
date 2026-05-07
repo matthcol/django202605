@@ -1,0 +1,25 @@
+services:
+
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB:       netpy
+      POSTGRES_USER:     netpy
+      POSTGRES_PASSWORD: netpy
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  db_test:
+    image: postgres:17
+    environment:
+      POSTGRES_DB:       test_netpy
+      POSTGRES_USER:     netpy
+      POSTGRES_PASSWORD: netpy
+    ports:
+      - "5433:5432"
+    # pas de volume : pas de persistance
+
+volumes:
+  postgres_dev_data:
