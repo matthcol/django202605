@@ -4,14 +4,16 @@ from django.shortcuts import render
 from django.db.models import QuerySet
 
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from app_movie.models import Movie
+from app_movie.models import Movie, Play
 from app_movie.serializers import (
     MovieSimpleSerializer,
     MovieDetailSerializer,
-    MovieSaveSerializer
+    MovieSaveSerializer,
+    PlayInputSerializer,
 )
 
 # Create your views here.
@@ -36,7 +38,7 @@ class MovieViewSet(ModelViewSet):
                 return MovieDetailSerializer
             case 'list':
                 return MovieSimpleSerializer
-            case _:
+            case _: # create, update, partial_update, destroy
                 return MovieSaveSerializer
 
 
@@ -71,4 +73,14 @@ class MovieViewSet(ModelViewSet):
     #     self.perform_update(serializer)
     #     return self._detail_response(instance.pk)
     
-    # TODO : route casting + PATCH
+    @action(detail=True, methods=['put'], url_path='casting')
+    def casting(self, request, *_args, **_kwargs):
+        movie = self.get_object()
+        serializer = PlayInputSerializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        Play.objects.filter(movie=movie).delete()
+        Play.objects.bulk_create([
+            Play(movie=movie, actor=item['actor'], character=item['character'])
+            for item in serializer.validated_data
+        ])
+        return self._detail_response(movie.pk)
