@@ -6,12 +6,14 @@ from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
 
-from app_movie.models import Movie
+from app_movie.models import Movie, Play
 from app_movie.serializers import (
     MovieSimpleSerializer,
     MovieDetailSerializer,
-    MovieSaveSerializer
+    MovieSaveSerializer,
+    CastingItemSerializer
 )
 
 # Create your views here.
@@ -67,5 +69,16 @@ class MovieViewSet(ModelViewSet):
     #     serializer.is_valid(raise_exception=True)
     #     self.perform_update(serializer)
     #     return self._detail_response(instance.pk)
-    
-    # TODO : route casting + PATCH
+
+    # /api/movies/{pk}/casting
+    @action(detail=True, methods=['put'], url_path='casting')
+    def update_casting(self, request, *_args, **_kwargs):
+        instance = self.get_object()
+        serializer = CastingItemSerializer(instance, data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        Play.objects.filter(movie=instance).delete()
+        Play.objects.bulk_create([
+            Play(movie=instance, actor=item['actor'], character=item['character'])
+            for item in serializer.validated_data
+        ])
+        return self._detail_response(instance.pk)

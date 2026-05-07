@@ -1,8 +1,12 @@
 from rest_framework.serializers import (
+    CharField,
+    PrimaryKeyRelatedField,
     ModelSerializer,
+    Serializer,
 )
 
 from app_movie.models import Movie
+from app_people.models import Person
 from app_people.serialisers import PersonSerializer
 
 class MovieSaveSerializer(ModelSerializer):
@@ -27,3 +31,6 @@ class MovieSimpleSerializer(ModelSerializer):
         model = Movie
         fields = 'id', 'title', 'year',
 
+class CastingItemSerializer(Serializer):
+    actor = PrimaryKeyRelatedField(queryset=Person.objects.all())
+    character = CharField(max_length=100)
