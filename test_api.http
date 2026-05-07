@@ -1,0 +1,175 @@
+# IDs après feed.py sur base vide (SQLite — séquence repart à 1 après DELETE)
+#
+# Persons (sélection utile)
+#   id=6   Christopher Nolan      (réalisateur)
+#   id=7   Christian Bale
+#   id=10  Tom Hardy
+#   id=11  Joseph Gordon-Levitt
+#   id=13  Cillian Murphy
+#   id=25  Leonardo DiCaprio
+#   id=26  Elliot Page
+#   id=27  Ken Watanabe
+#   id=39  Daniel Craig
+#   id=97  Rian Johnson           (réalisateur)
+#   id=98  Ana de Armas
+#
+# Movies (sélection)
+#   id=1   Memento (2000)
+#   id=4   The Dark Knight (2008)
+#   id=5   Inception (2010)
+#   id=10  Oppenheimer (2023)
+#   id=28  Knives Out (2019)
+#   id=29  Glass Onion (2022)
+
+@baseUrl = http://localhost:8000/api
+
+# ─────────────────────────────────────────────
+# LECTURE
+# ─────────────────────────────────────────────
+
+### liste des films (simple : id, title, year)
+GET {{baseUrl}}/movies/
+
+###  détail Inception — director + actors avec character
+GET {{baseUrl}}/movies/5/
+
+### détail Oppenheimer
+GET {{baseUrl}}/movies/10/
+
+### détail Knives Out
+GET {{baseUrl}}/movies/28/
+
+### liste des personnes
+GET {{baseUrl}}/persons/
+
+### détail Christopher Nolan
+GET {{baseUrl}}/persons/6/
+
+# ─────────────────────────────────────────────
+# CRÉATION
+# ─────────────────────────────────────────────
+
+### POST nouveau film (director = Nolan id=6)
+POST {{baseUrl}}/movies/
+Content-Type: application/json
+
+{
+    "title": "The Dark Knight Returns",
+    "year": 2026,
+    "duration": 150,
+    "director": 6
+}
+
+### POST film sans réalisateur (champ nullable)
+POST {{baseUrl}}/movies/
+Content-Type: application/json
+
+{
+    "title": "Film sans réalisateur",
+    "year": 2025
+}
+
+### POST film — erreur : director inexistant
+POST {{baseUrl}}/movies/
+Content-Type: application/json
+
+{
+    "title": "Film invalide",
+    "year": 2025,
+    "director": 9999
+}
+
+# ─────────────────────────────────────────────
+# MODIFICATION
+# ─────────────────────────────────────────────
+
+### PUT Memento — changement complet (director = Nolan id=6)
+PUT {{baseUrl}}/movies/1/
+Content-Type: application/json
+
+{
+    "title": "Memento",
+    "year": 2000,
+    "duration": 113,
+    "director": 6
+}
+
+### PATCH Inception — mise à jour partielle (durée uniquement)
+PATCH {{baseUrl}}/movies/5/
+Content-Type: application/json
+
+{
+    "duration": 149
+}
+
+### PATCH Inception — rétablissement durée originale
+PATCH {{baseUrl}}/movies/5/
+Content-Type: application/json
+
+{
+    "duration": 148
+}
+
+# ─────────────────────────────────────────────
+# CASTING
+# ─────────────────────────────────────────────
+
+### PUT casting Inception — casting original
+PUT {{baseUrl}}/movies/5/casting/
+Content-Type: application/json
+
+[
+    {"actor": 25, "character": "Cobb"},
+    {"actor": 11, "character": "Arthur"},
+    {"actor": 26, "character": "Ariadne"},
+    {"actor": 10, "character": "Eames"},
+    {"actor": 27, "character": "Saito"}
+]
+
+### PUT casting Inception — nouveau casting (Cillian Murphy ajouté)
+PUT {{baseUrl}}/movies/5/casting/
+Content-Type: application/json
+
+[
+    {"actor": 25, "character": "Cobb"},
+    {"actor": 11, "character": "Arthur"},
+    {"actor": 26, "character": "Ariadne"},
+    {"actor": 10, "character": "Eames"},
+    {"actor": 27, "character": "Saito"},
+    {"actor": 13, "character": "Fischer"}
+]
+
+### PUT casting — erreur : acteur inexistant
+PUT {{baseUrl}}/movies/5/casting/
+Content-Type: application/json
+
+[
+    {"actor": 9999, "character": "Fantôme"}
+]
+
+### PUT casting Glass Onion — casting original
+PUT {{baseUrl}}/movies/29/casting/
+Content-Type: application/json
+
+[
+    {"actor": 39,  "character": "Benoit Blanc"},
+    {"actor": 102, "character": "Miles Bron"},
+    {"actor": 103, "character": "Andi Brand / Helen Brand"},
+    {"actor": 104, "character": "Birdie Jay"},
+    {"actor": 105, "character": "Duke Cody"}
+]
+
+# ─────────────────────────────────────────────
+# SUPPRESSION
+# ─────────────────────────────────────────────
+
+### DELETE film sans casting (Film sans réalisateur créé plus haut — adapter l'id)
+DELETE {{baseUrl}}/movies/40/
+
+### DELETE Memento (id=1) — cascade sur 3 Play (Leonard Shelby, Natalie, Teddy)
+# Vérifier avant : GET /movies/1/ → actors présents
+# Vérifier après : GET /movies/1/ → 404
+DELETE {{baseUrl}}/movies/1/
+
+### DELETE film inexistant — erreur 404
+DELETE {{baseUrl}}/movies/9999/
