@@ -54,18 +54,21 @@ class MovieViewSet(ModelViewSet):
     # TODO : merge update et partial_update
     @override
     def update(self, request, *_args, **_kwargs):
+        partial = _kwargs.get('partial', False)
         instance = self.get_object()
-        serializer = MovieSaveSerializer(instance, data=request.data)
+        serializer = MovieSaveSerializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return self._detail_response(instance.pk)
 
-    @override
-    def partial_update(self, request, *_args, **_kwargs):
-        instance = self.get_object()
-        serializer = MovieSaveSerializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return self._detail_response(instance.pk)
+    # NB: partial_updare hanfled by update
+
+    # @override
+    # def partial_update(self, request, *_args, **_kwargs):
+    #     instance = self.get_object()
+    #     serializer = MovieSaveSerializer(instance, data=request.data, partial=True)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_update(serializer)
+    #     return self._detail_response(instance.pk)
     
     # TODO : route casting + PATCH

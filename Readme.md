@@ -49,8 +49,19 @@ python .\manage.py shell_plus --lab           # dans le navigateur
 Pour lancer le notebook dans VSCode:
 ```
 DJANGO_SETTINGS_MODULE=netpy.settings
-````
+```
 
 ## Documentation Queries et fonctions
 - https://docs.djangoproject.com/en/6.0/ref/models/querysets
 - https://docs.djangoproject.com/en/6.0/ref/models/database-functions
+
+## Feed Database
+Bash ou cmd:
+```
+python manage.py shell_plus < feed.py
+```
+
+Powershell
+```
+Get-Content feed.py | python manage.py shell_plus
+```
